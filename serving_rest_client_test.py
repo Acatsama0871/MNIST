@@ -69,7 +69,7 @@ def make_prediction_request(image, prediction_url, auth, verify):
     }
     response = requests.post(prediction_url, json=json, auth=auth, verify=verify)
 
-    print('HTTP Response %s' % response.status_code)
+    print(f'HTTP Response {response.status_code}')
     print(response.text)
 
 
@@ -84,10 +84,7 @@ def main():
     parser.add_argument('-S', '--show', type=str2bool, help='Show sample digit using mathplotlib; defaults to False', default=False)
     args = parser.parse_args()
 
-    plotting = False
-    if args.show:
-        plotting = try_importing_mathplotlib()
-
+    plotting = try_importing_mathplotlib() if args.show else False
     i = 1
     req_cnt = 0
     if args.iterations:

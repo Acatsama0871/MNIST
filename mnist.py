@@ -100,8 +100,12 @@ def define_mnist_flags():
     flags_core.define_performance(num_parallel_calls=False)
     flags_core.define_image()
     data_dir = os.path.abspath(os.environ.get('PS_JOBSPACE', os.getcwd()) + '/data')
-    model_dir = os.path.abspath(os.environ.get('PS_MODEL_PATH', os.getcwd() + '/models') + '/mnist')
-    export_dir = os.path.abspath(os.environ.get('PS_MODEL_PATH', os.getcwd() + '/models'))
+    model_dir = os.path.abspath(
+        os.environ.get('PS_MODEL_PATH', f'{os.getcwd()}/models') + '/mnist'
+    )
+    export_dir = os.path.abspath(
+        os.environ.get('PS_MODEL_PATH', f'{os.getcwd()}/models')
+    )
     flags.adopt_module_key_flags(flags_core)
     flags_core.set_defaults(data_dir=data_dir,
                             model_dir=model_dir,
@@ -270,6 +274,6 @@ if __name__ == '__main__':
     # Print ENV Variables
     tf.logging.debug('=' * 20 + ' Environment Variables ' + '=' * 20)
     for k, v in os.environ.items():
-        tf.logging.debug('{}: {}'.format(k, v))
+        tf.logging.debug(f'{k}: {v}')
 
     absl_app.run(main)

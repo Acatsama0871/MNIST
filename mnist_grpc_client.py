@@ -48,27 +48,26 @@ def _callback(result_future):
     Args:
       result_future: Result future of the RPC.
     """
-    global _counter 
+    global _counter
     global _start
-    exception = result_future.exception()
-    if exception:
-      print(exception)
+    if exception := result_future.exception():
+        print(exception)
     else:
-      #print("From Callback",result_future.result().outputs['probabilities'])
-      if(_start == 0):
-          _start = time.time()
-      response = numpy.array(
-          result_future.result().outputs['probabilities'].float_val)
-      if response.size:
-          prediction = numpy.argmax(response)
-          if( (_counter % 10) ==0):
-              print("[", _counter,"] From Callback Predicted Result is ", prediction,"confidence= ",response[prediction])
-      else:
-          print("empty response")
-      _counter += 1
-      if (_counter == FLAGS.num_tests):
-          end = time.time()
-          print("Time for ",FLAGS.num_tests," is ",end -_start)
+        #print("From Callback",result_future.result().outputs['probabilities'])
+        if(_start == 0):
+            _start = time.time()
+        response = numpy.array(
+            result_future.result().outputs['probabilities'].float_val)
+        if response.size:
+            prediction = numpy.argmax(response)
+            if( (_counter % 10) ==0):
+                print("[", _counter,"] From Callback Predicted Result is ", prediction,"confidence= ",response[prediction])
+        else:
+            print("empty response")
+        _counter += 1
+        if (_counter == FLAGS.num_tests):
+            end = time.time()
+            print("Time for ",FLAGS.num_tests," is ",end -_start)
 
 
 def do_inference(hostport, work_dir, concurrency, num_tests, model_name, hostname_override, insecure):
@@ -83,13 +82,12 @@ def do_inference(hostport, work_dir, concurrency, num_tests, model_name, hostnam
     Raises:
         IOError: An error occurred processing test data set.
     """
+    channel_options=None
     if insecure:
-        channel_options=None
         if hostname_override:
             channel_options=(('grpc.default_authority', hostname_overrride),)
         channel = grpc.insecure_channel(hostport, options=channel_options)
     else:
-        channel_options=None
         if hostname_override:
             channel_options=(('grpc.ssl_target_name_override', hostname_override),)
         channel_creds = grpc.ssl_channel_credentials()
@@ -99,7 +97,7 @@ def do_inference(hostport, work_dir, concurrency, num_tests, model_name, hostnam
     request = predict_pb2.PredictRequest()
     request.model_spec.name = model_name
     request.model_spec.signature_name = 'serving_default'
-    
+
     (X_train, y_train), (X_test, y_test) = mnist.load_data()
     X_test = X_test.reshape(X_test.shape[0], 1, 28, 28)
     X_train = X_train.reshape(X_train.shape[0], 1, 28, 28)
@@ -122,7 +120,7 @@ def do_inference(hostport, work_dir, concurrency, num_tests, model_name, hostnam
         image_index=randint(0, 9999)
         x= X_train[image_index][0]
     print("Time to Send ", num_tests ," is ",end - start)
-        
+
     time.sleep(6) # increase if above 1000 iterations
     # if things are wrong the callback will not come, so uncomment below to force the result
     # or get to see what is the bug

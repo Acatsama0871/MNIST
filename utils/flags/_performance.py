@@ -132,10 +132,7 @@ def define_performance(num_parallel_calls=True, inter_op=True, intra_op=True,
     loss_scale_val_msg = "loss_scale should be a positive integer."
     @flags.validator(flag_name="loss_scale", message=loss_scale_val_msg)
     def _check_loss_scale(loss_scale):  # pylint: disable=unused-variable
-      if loss_scale is None:
-        return True  # null case is handled in get_loss_scale()
-
-      return loss_scale > 0
+      return True if loss_scale is None else loss_scale > 0
 
   if all_reduce_alg:
     flags.DEFINE_string(

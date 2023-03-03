@@ -20,6 +20,7 @@ This module is intended to keep users from needing to consider logging (or
 install the module) unless they are performing mlperf runs.
 """
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -45,7 +46,7 @@ DROP_CACHE_LOC = os.getenv("DROP_CACHE_LOC", "/proc/sys/vm/drop_caches")
 _NCF_PREFIX = "NCF_RAW_"
 
 # TODO(robieta): move line parsing to mlperf util
-_PREFIX = r"(?:{})?:::MLPv([0-9]+).([0-9]+).([0-9]+)".format(_NCF_PREFIX)
+_PREFIX = f"(?:{_NCF_PREFIX})?:::MLPv([0-9]+).([0-9]+).([0-9]+)"
 _BENCHMARK = r"([a-zA-Z0-9_]+)"
 _TIMESTAMP = r"([0-9]+\.[0-9]+)"
 _CALLSITE = r"\((.+):([0-9]+)\)"
@@ -77,10 +78,8 @@ def parse_line(line): # type: (str) -> typing.Optional[ParsedLine]
 def unparse_line(parsed_line): # type: (ParsedLine) -> str
   version_str = "{}.{}.{}".format(*parsed_line.version)
   callsite_str = "({}:{})".format(*parsed_line.callsite)
-  value_str = ": {}".format(parsed_line.value) if parsed_line.value else ""
-  return ":::MLPv{} {} {} {} {} {}".format(
-      version_str, parsed_line.benchmark, parsed_line.timestamp, callsite_str,
-      parsed_line.tag, value_str)
+  value_str = f": {parsed_line.value}" if parsed_line.value else ""
+  return f":::MLPv{version_str} {parsed_line.benchmark} {parsed_line.timestamp} {callsite_str} {parsed_line.tag} {value_str}"
 
 
 def get_mlperf_log():
@@ -178,11 +177,8 @@ TAGS = LOGGER.tags
 def clear_system_caches():
   if not LOGGER.enabled:
     return
-  ret_code = subprocess.call(
-      ["sync && echo 3 | {} tee {}".format(SUDO, DROP_CACHE_LOC)],
-      shell=True)
-
-  if ret_code:
+  if ret_code := subprocess.call(
+      [f"sync && echo 3 | {SUDO} tee {DROP_CACHE_LOC}"], shell=True):
     raise ValueError("Failed to clear caches")
 
 
