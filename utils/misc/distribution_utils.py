@@ -51,9 +51,9 @@ def get_distribution_strategy(num_gpus,
     else:
       return tf.contrib.distribute.OneDeviceStrategy("device:GPU:0")
   elif turn_off_distribution_strategy:
-    raise ValueError("When {} GPUs are specified, "
-                     "turn_off_distribution_strategy flag cannot be set to"
-                     "True.".format(num_gpus))
+    raise ValueError(
+        f"When {num_gpus} GPUs are specified, turn_off_distribution_strategy flag cannot be set toTrue."
+    )
   else:  # num_gpus > 1 and not turn_off_distribution_strategy
     devices = ["device:GPU:%d" % i for i in range(num_gpus)]
     if all_reduce_alg:
@@ -81,11 +81,7 @@ def per_device_batch_size(batch_size, num_gpus):
   if num_gpus <= 1:
     return batch_size
 
-  remainder = batch_size % num_gpus
-  if remainder:
-    err = ("When running with multiple GPUs, batch size "
-           "must be a multiple of the number of available GPUs. Found {} "
-           "GPUs with a batch size of {}; try --batch_size={} instead."
-          ).format(num_gpus, batch_size, batch_size - remainder)
+  if remainder := batch_size % num_gpus:
+    err = f"When running with multiple GPUs, batch size must be a multiple of the number of available GPUs. Found {num_gpus} GPUs with a batch size of {batch_size}; try --batch_size={batch_size - remainder} instead."
     raise ValueError(err)
   return int(batch_size / num_gpus)
